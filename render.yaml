@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: nedbank-rag
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn application.server:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: AZURE_SEARCH_ENDPOINT
+        scope: run
+      - key: AZURE_SEARCH_KEY
+        scope: run
+      - key: AZURE_SEARCH_INDEX
+        scope: run
+      - key: GROQ_API_KEY
+        scope: run
+      - key: AZURE_STORAGE_CONNECTION_STRING
+        scope: run
+      - key: AZURE_STORAGE_CONTAINER
+        scope: run
