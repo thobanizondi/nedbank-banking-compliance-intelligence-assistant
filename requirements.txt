@@ -10,8 +10,7 @@ azure-identity==1.25.3
 groq==1.7.0
 python-dotenv==0.21.0
 huggingface-hub==1.32.0
-torch==2.14.0
-transformers==5.17.0
+onnxruntime-cpu
 requests==2.34.2
 pydantic==2.13.5
 pydantic-settings==2.15.0

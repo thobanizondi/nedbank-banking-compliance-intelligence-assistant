@@ -14,7 +14,10 @@ search_endpoint = os.getenv("AZURE_SEARCH_ENDPOINT")
 search_key = os.getenv("AZURE_SEARCH_KEY")
 search_index_name = os.getenv("AZURE_SEARCH_INDEX")
 
-embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+embeddings = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2",
+    model_kwargs={"device": "cpu"}
+)
 
 vector_store = AzureSearch(
     azure_search_endpoint=search_endpoint,
