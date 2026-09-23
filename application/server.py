@@ -16,17 +16,29 @@ search_endpoint = os.getenv("AZURE_SEARCH_ENDPOINT")
 search_key = os.getenv("AZURE_SEARCH_KEY")
 search_index_name = os.getenv("AZURE_SEARCH_INDEX")
 
-embeddings = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-L6-v2",
-    model_kwargs={"device": "cpu"}
-)
+# Lazy load embeddings - only when first needed
+_embeddings = None
+_vector_store = None
 
-vector_store = AzureSearch(
-    azure_search_endpoint=search_endpoint,
-    azure_search_key=search_key,
-    index_name=search_index_name,
-    embedding_function=embeddings.embed_query,
-)
+def get_embeddings():
+    global _embeddings
+    if _embeddings is None:
+        _embeddings = HuggingFaceEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2",
+            model_kwargs={"device": "cpu"}
+        )
+    return _embeddings
+
+def get_vector_store():
+    global _vector_store
+    if _vector_store is None:
+        _vector_store = AzureSearch(
+            azure_search_endpoint=search_endpoint,
+            azure_search_key=search_key,
+            index_name=search_index_name,
+            embedding_function=get_embeddings().embed_query,
+        )
+    return _vector_store
 
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
@@ -38,7 +50,9 @@ class QuestionRequest(BaseModel):
 
 
 def ask_question(question: str, k: int = 8):
+    vector_store = get_vector_store()
     results = vector_store.similarity_search(query=question, k=k)
+    
     context_parts = []
     for doc in results:
         source = doc.metadata.get("source", "unknown")
